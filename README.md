@@ -68,18 +68,33 @@ This proposal defines two new URI query parameters `pjnpub=` and `pjnostrrelays=
 A possible BIP-21 URI string could look like this 
 `bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pjnpub=npub1jfpffumqvyfuj7xgtmk3pe3npultvn2feh7n2qn5657xrsx6fzkq9hstew&pjnostrrelays=wss://nostr-pub.wellorder.net,wss://relay.damus.io,wss://relay.nostr.info`.
 
+### Message
+
+The message for the `Original PSBT` should look as follows. 
+`<PSBT_Base64> + '?params' + <json_string_of_parameters>`
+`?params` acts as a unique separator between the `Original PSBT` and the optional parameters. 
+A potential message could look like this: 
+
+```text
+cHNidP8BAHMCAAAAAY8nutGgJdyYGXWiBEb45Hoe9lWGbkxh/6bNiOJdCDuDAAAAAAD+////AtyVuAUAAAAAF6kUHehJ8GnSdBUOOv6ujXLrWmsJRDCHgIQeAAAAAAAXqRR3QJbbz0hnQ8IvQ0fptGn+votneofTAAAAAAEBIKgb1wUAAAAAF6kU3k4ekGHKWRNbA1rV5tR5kEVDVNCHAQcXFgAUx4pFclNVgo1WWAdN1SYNX8tphTABCGsCRzBEAiB8Q+A6dep+Rz92vhy26lT0AjZn4PRLi8Bf9qoB/CMk0wIgP/Rj2PWZ3gEjUkTlhDRNAQ0gXwTO7t9n+V14pZ6oljUBIQMVmsAaoNWHVMS02LfTSe0e388LNitPa1UQZyOihY+FFgABABYAFEb2Giu6c4KO5YW0pfw3lGp9jMUUAAA=?params'{"disableOutputSubstitution": true, "payjoinVersion": 2}'
+```
+
+The separator should only be included if there are any optional parameters.
+
 ### Communication
 
 This basically tells the sender that he should create the `Original PSBT` sending to `175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W` and the `Original PSBT` should be sent via nostr DM to this `npub1jfpffumqvyfuj7xgtmk3pe3npultvn2feh7n2qn5657xrsx6fzkq9hstew` npub.
 Among the relays to which the sender broadcasts the DM should be the following relays `wss://nostr-pub.wellorder.net`, `wss://relay.damus.io` and `wss://relay.nostr.info`.
 The sender should try to send to all the listed relays in order to maximize the chance of the receiver seeing the DM.
 
-- After receiving the DM with `Original PSBT` the receiver does the process as defined in BIP-78 and answers the DM with the `Payjoin Proposal PSBT`.
+- After receiving the DM with `Original PSBT`
+  - the receiver parses the messages for the PSBT and the parameters 
+  - the receiver does the process as defined in BIP-78 and answers the DM with the `Payjoin Proposal PSBT`.
 - When receiving the DM with the `Payjoin Proposal PSBT` the sender verifies the psbt and broadcasts the `Payjoin Transaction`.
 
 This workflow allows for asynchronous interaction between the two parties.
 As part of the asynchronous workflow it is optional to broadcast the `Original Psbt` after a timeout. 
-Wallet developers should find a good middle ground between waiting and broadcasting the `Original Psbt` depending on the urgency of the transaction.    
+Wallet developers should find a good middle ground between waiting and broadcasting the `Original Psbt` depending on the urgency of the transaction.
 
 ## Wallet Developers
 Wallet Developers should make sure to store the generated nostr key pairs in order to know which npubs have to be checked for DMs.
